@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat con lista di contatti</title>
+    <style>
+        /* Estilos básicos */
+        #chat-container {
+            display: flex;
+            width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        #user-list {
+            flex: 1;
+            padding: 10px;
+            border-right: 1px solid #eee;
+        }
+        #chat-area {
+            flex: 2;
+            padding: 10px;
+            border-left: 1px solid #eee;
+        }
+        #chat-messages {
+            border: 1px solid #eee;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        #chat-form input[type="text"] {
+            width: 80%;
+            padding: 8px;
+        }
+        #chat-form input[type="submit"] {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        #user-search input[type="text"] {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+        #user-search input[type="submit"] {
+            width: 100%;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <form action="{{ url_for('chat_users') }}" method="GET">
+        <input type="text" name="text">
+        <input type="submit" value="Search">
+    </form>
+    <ul id="user_id">
+        {% for user in user_id %}
+            <li>{{ user }}</li>
+        {% endfor %}
+    </ul>
+        </div>
+        <div id="chat-area">
+            <div id="chat-messages">
+            </div>
+            <form id="chat-form">
+                <input type="text" id="message-input" placeholder="Escribe tu mensaje...">
+                <input type="submit" value="Enviar">
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+
