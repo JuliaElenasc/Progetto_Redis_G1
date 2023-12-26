@@ -87,14 +87,11 @@ class DataBase:
     @staticmethod
     def search_user(text):
         redis_db = get_config().redis_client
-        cursor=0
         matching_usernames=[]
-        while True:
-            cursor,users= redis_db.sscan('users', cursor, match=f'*{text}*' )
-            print(users)
-            matching_usernames=[elemento.decode('utf-8') for elemento in users]
-            if cursor==0:
-                break
+        users= redis_db.keys(f'*{text}*' )
+        for user in users:
+            username = user.decode('utf-8').split(':')[-1]
+            matching_usernames.append(username)
         return matching_usernames
     
     @staticmethod
