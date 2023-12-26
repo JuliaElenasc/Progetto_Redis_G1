@@ -39,6 +39,7 @@ def login():
 
 @app.route('/chat_users', methods=['GET','POST'])
 def chat_users():
+    user_id=None
     if request.method == 'GET':
         text = request.args.get('text')
         print (text)

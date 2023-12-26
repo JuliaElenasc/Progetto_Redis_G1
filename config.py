@@ -1,3 +1,4 @@
+import json
 import redis
 import os
 from werkzeug.utils import import_string
@@ -25,7 +26,9 @@ class User:
     def __init__(self, username, password): 
         self.username = username 
         self.password = password
-        self.active= True
+        self.mode= True
+        self.contacts=[]
+
 
 class DataBase:
     @staticmethod 
@@ -40,7 +43,8 @@ class DataBase:
             user_key = f"user:{user.username}"
             user_details = {
                 "password": user.password,
-                "status": str(user.active)
+                "mode": str(user.mode),
+                "contacts" :json.dumps(user.contacts)
             }
             redis_db.hmset(user_key, user_details)
             redis_db.sadd('users', user.username)
@@ -56,7 +60,7 @@ class DataBase:
             return {
                 'username': username,
                 'password': password,
-                'status': user_details.get(b'status')
+                'mode': user_details.get(b'mode')
             }
         else:
             return None
@@ -82,7 +86,6 @@ class DataBase:
     
     @staticmethod
     def search_user(text):
-        print('ok')
         redis_db = get_config().redis_client
         cursor=0
         matching_usernames=[]
@@ -93,3 +96,9 @@ class DataBase:
             if cursor==0:
                 break
         return matching_usernames
+    
+    @staticmethod
+    def add_contact():
+        redis_db = get_config().redis_client
+        
+        return 

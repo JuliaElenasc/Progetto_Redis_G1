@@ -54,9 +54,13 @@
         <input type="submit" value="Search">
     </form>
     <ul id="user_id">
-        {% for user in user_id %}
-            <li>{{ user }}</li>
-        {% endfor %}
+        {% if user_id is not none %}
+            {% for user in user_id %}
+                <li>{{ user }} <button onclick="startChat('{{ user }}')">Aggiunge utente</button></li>
+            {% endfor %}
+        {% else %}
+            <li>No users found</li>
+        {% endif %}
     </ul>
         </div>
         <div id="chat-area">
