@@ -49,6 +49,21 @@
     </style>
 </head>
 <body>
+    {% if dettaglioUtente %}
+        <p>Bienvenido, {{ dettaglioUtente }}!</p>
+        <form action="/change_mode" method="post">
+            <input type="radio" id="acceso" name="mode" value="on">
+            <label for="acceso">DND On </label><br>
+        
+            <input type="radio" id="spento" name="mode" value="off">
+            <label for="spento">DND Off</label><br>
+        
+            <input type="submit" value="Save">
+        </form>
+    {% else %}
+        <p>No se ha iniciado sesión.</p>
+    {% endif %}
+    
     <form action="{{ url_for('chat_users') }}" method="GET">
         <input type="text" name="text">
         <input type="submit" value="Search">
@@ -56,10 +71,27 @@
     <ul id="user_id">
         {% if user_id is not none %}
             {% for user in user_id %}
-                <li>{{ user }} <button onclick="startChat('{{ user }}')">Aggiunge utente</button></li>
+                <li>{{ user }} 
+                    <form action="{{ url_for('add_contact', username=user) }}" method="POST">
+                        <input type="hidden" name="contact" value="{{ user }}">
+                        <input type="submit" value="Add contact">
+                    </form>
+                </li>
             {% endfor %}
         {% else %}
             <li>No users found</li>
+        {% endif %}
+    </ul>
+    <ul id="contacts-list">
+        {% if contacts %}
+            <h3>Contatti</h3>
+            <ul>
+                {% for contact in contacts %}
+                    <li>{{ contact }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Nesun contatto ancora.</p>
         {% endif %}
     </ul>
         </div>

@@ -10,10 +10,12 @@ class Config(object):
     REDIS_PORT = 16811
     REDIS_PASSWORD = "6dAlNtEyjjzvzXX8DWYGK64QMvWBx21c"
     SESSION_TYPE = "redis"
+    secret_key='12345'
     redis_client = redis.Redis(
         host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD
     )
     SESSION_REDIS = redis_client
+    
 
 class ConfigDev(Config):
     DEBUG = True
@@ -47,7 +49,6 @@ class DataBase:
                 "contacts" :json.dumps(user.contacts)
             }
             redis_db.hmset(user_key, user_details)
-            redis_db.sadd('users', user.username)
             return True
         
         return False
@@ -64,26 +65,7 @@ class DataBase:
             }
         else:
             return None
-
-    @staticmethod #revisar la logica...
-    def change_user_DND(username):
-        user_key = f"user:{username}"
-        redis_db = get_config().redis_client
-        user_details = redis_db.hgetall(user_key)
-        if not user_details:
-            return False 
-        user_details["active"] = "DND"
-        redis_db.hmset(user_key, user_details)
-        return True 
-    
-    @staticmethod #no es necesario
-    def list_users ():
-        redis_db = get_config().redis_client
-        users_set = redis_db.smembers('users')
-        users_set_str = [elemento.decode('utf-8') for elemento in users_set]
-        print(users_set_str)
-        return (users_set_str)
-    
+             
     @staticmethod
     def search_user(text):
         redis_db = get_config().redis_client
@@ -95,7 +77,39 @@ class DataBase:
         return matching_usernames
     
     @staticmethod
-    def add_contact():
+    def contact_list(username):
         redis_db = get_config().redis_client
-        
-        return 
+        user_key = f"user:{username}"
+        contact_list= redis_db.lrange(f'{user_key}:contacts', 0, -1)
+        contacts=[contact.decode('utf-8') for contact in contact_list]
+        return contacts        
+
+    @staticmethod
+    def add_contact(username, contact):
+        redis_db = get_config().redis_client
+        user_key = f"user:{username}"
+        redis_db.rpush(f'{user_key}:contacts', contact)
+        return 'ok'
+
+    @staticmethod # creo que no lo uso - verificar
+    def get_contacts (username):
+        redis_db = get_config().redis_client
+        users_set = redis_db.smembers('users')
+        users_set_str = [elemento.decode('utf-8') for elemento in users_set]
+        print(users_set_str)
+        return (users_set_str) 
+    
+    @staticmethod
+    def dnd_mode_f(username):
+        redis_db = get_config().redis_client
+        user_key = f"user:{username}"
+        dnd_mode = redis_db.hset(user_key, "mode", "False")
+        print(dnd_mode)
+        return dnd_mode
+    
+    @staticmethod
+    def dnd_mode_t(username):
+        redis_db = get_config().redis_client
+        user_key = f"user:{username}"
+        dnd_mode = redis_db.hset(user_key, "mode", "True")
+        return dnd_mode
