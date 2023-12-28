@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, render_template, redirect, session
+import datetime
+from flask import Flask, Response, g, request, jsonify, render_template, redirect, session, url_for
 from config import get_config, User, DataBase
 
 app = Flask(__name__)
@@ -70,13 +71,40 @@ def change_mode():
     username = session.get('user')
     if 'user' in session:
         dnd=request.form.get('mode')
-        print(dnd) #estoy recibiendo bien on y of del frontend
         if dnd == 'on':
             DataBase.dnd_mode_t(username)
         else:
             DataBase.dnd_mode_f(username)
     return redirect('/chat_users')
 
+@app.route ('/start_chat', methods=['POST'])
+def start_chat ():
+    if request.method == 'POST':
+        username = session.get('user')
+        contact= request.form.get('contact')
+        channel=DataBase.subscribe_chat(username,contact)
+    return redirect ('/chat_users')
 
+@app.route ('/channel', methods=['GET','POST'])
+def channel():
+    username=session.get('user')
+    contact= request.args.get('contact')
+    channel=f'{username}_{contact}'
+    return redirect (url_for ('chat_users', channel=channel))
+
+@app.route('/post', methods=['POST'])
+def post():
+    message = request.form['message']
+    user = session.get('user')
+    contact= request.form.get('contact')
+    DataBase.publish_message(user,contact, message)
+    return Response(status=204)
+
+@app.route('/stream', methods=['GET','POST'])
+def stream():
+    username=session.get('user')
+    contact= request.args.get('contact')
+    return Response(DataBase.event_stream(username,contact), mimetype="text/event-stream")
+    
 if __name__ == '__main__':
     app.run(debug=True)

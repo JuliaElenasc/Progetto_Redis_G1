@@ -1,8 +1,9 @@
 import json
 import redis
 import os
-from werkzeug.utils import import_string
-from flask import Flask, request, jsonify
+from flask import Flask, Response, g, request, jsonify
+import datetime
+
 
 #Conessione al server
 class Config(object):
@@ -10,7 +11,6 @@ class Config(object):
     REDIS_PORT = 16811
     REDIS_PASSWORD = "6dAlNtEyjjzvzXX8DWYGK64QMvWBx21c"
     SESSION_TYPE = "redis"
-    secret_key='12345'
     redis_client = redis.Redis(
         host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD
     )
@@ -90,14 +90,6 @@ class DataBase:
         user_key = f"user:{username}"
         redis_db.rpush(f'{user_key}:contacts', contact)
         return 'ok'
-
-    @staticmethod # creo que no lo uso - verificar
-    def get_contacts (username):
-        redis_db = get_config().redis_client
-        users_set = redis_db.smembers('users')
-        users_set_str = [elemento.decode('utf-8') for elemento in users_set]
-        print(users_set_str)
-        return (users_set_str) 
     
     @staticmethod
     def dnd_mode_f(username):
@@ -113,3 +105,46 @@ class DataBase:
         user_key = f"user:{username}"
         dnd_mode = redis_db.hset(user_key, "mode", "True")
         return dnd_mode
+    
+    @staticmethod
+    def get_mode(user):
+        redis_db = get_config().redis_client
+        user_key = f"user:{user}"
+        mode= redis_db.hget(user_key, "mode")
+        return mode
+    
+    @staticmethod
+    def subscribe_chat(username, contact):
+        redis_db = get_config().redis_client
+        pubsub = redis_db.pubsub()
+        channel = f'{username}_{contact}'
+        pubsub.subscribe(channel)
+        return pubsub
+    
+    @staticmethod
+    def publish_message (user, contact, message):
+        redis_db = get_config().redis_client
+        user_mode = DataBase.get_mode(user)
+        contact_mode = DataBase.get_mode(contact)
+        if user_mode == b'False' and contact_mode == b'False':
+            now = datetime.datetime.now().replace(microsecond=0).time()
+            channel = g.channel
+            print(channel)
+            redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, message))
+            return 'ok'
+        elif contact_mode == b'True':
+            return '!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, L’UTENTE HA LA MODALITA’ DnD ATTIVA'
+        else:
+            return 'Unknown error'
+        
+    @staticmethod
+    def event_stream(username, contact):
+        redis_db = get_config().redis_client
+        pubsub = redis_db.pubsub(ignore_subscribe_messages=True)
+        channel = f'{username}_{contact}'
+        pubsub.subscribe(channel)
+        for message in pubsub.listen():
+            yield 'data: %s\n\n' % message['data']
+
+
+        

@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Chat con lista di contatti</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <style>
         /* Estilos básicos */
         #chat-container {
@@ -50,7 +51,7 @@
 </head>
 <body>
     {% if dettaglioUtente %}
-        <p>Bienvenido, {{ dettaglioUtente }}!</p>
+        <p>Benvenuto, {{ dettaglioUtente }}!</p>
         <form action="/change_mode" method="post">
             <input type="radio" id="acceso" name="mode" value="on">
             <label for="acceso">DND On </label><br>
@@ -88,6 +89,10 @@
             <ul>
                 {% for contact in contacts %}
                     <li>{{ contact }}</li>
+                    <form action="{{ url_for('channel', contact=contact) }}" method="POST">
+                        <input type="hidden" name="contact" value="{{ contact }}">
+                        <input type="submit" value="Start Chat">
+                    </form>
                 {% endfor %}
             </ul>
         {% else %}
@@ -96,14 +101,26 @@
     </ul>
         </div>
         <div id="chat-area">
-            <div id="chat-messages">
-            </div>
-            <form id="chat-form">
-                <input type="text" id="message-input" placeholder="Escribe tu mensaje...">
-                <input type="submit" value="Enviar">
-            </form>
-        </div>
-    </div>
+            <h2 {{ channel }}></h2>
+            <p>Message: <input id="in" /></p>
+<pre id="out"></pre>
+<script>
+    function sse() {
+        var source = new EventSource('/stream');
+        var out = document.getElementById('out');
+        source.onmessage = function(e) {
+            console.log(e.data)
+            out.innerHTML =  e.data + "\n" + out.innerHTML;
+        };
+    }
+    $('#in').keyup(function(e){
+        if (e.keyCode == 13) {
+            $.post('/post', {'message': $(this).val()});
+            $(this).val('');
+        }
+    });
+    sse();
+</script>
 
 </body>
 </html>
