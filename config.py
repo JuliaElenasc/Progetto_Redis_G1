@@ -122,18 +122,17 @@ class DataBase:
         return pubsub
     
     @staticmethod
-    def publish_message (user, channel, message):
+    def publish_message (user, contact,channel, message):
         redis_db = get_config().redis_client
         #user_mode = DataBase.get_mode(user)
-        #contact_mode = DataBase.get_mode(contact)
-        #if user_mode == b'False' and contact_mode == b'False':
+        contact_mode = DataBase.get_mode(contact)
+        #print('mode dnd del contacto:',contact_mode)
         now = datetime.datetime.now().replace(microsecond=0).time()
-        redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, message))
-        return 'ok'
-        #elif contact_mode == b'True':
-        #    return '!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, L’UTENTE HA LA MODALITA’ DnD ATTIVA'
-        # else:
-        #     return 'Unknown error'
+        if contact_mode == b'False':
+            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, message))
+        else:
+            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
+             
         
     @staticmethod
     def event_stream(channel):

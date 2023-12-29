@@ -99,16 +99,19 @@ def channel():
     channel_sort = sort_letters[:len(sort_letters)//2] + '_' + sort_letters[len(sort_letters)//2:]
     #print(channel_sort)
     session['channel'] = channel_sort
+    session['contact']=contact
     return redirect (url_for ('chat_users', channel=channel_sort))
 
 @app.route('/post', methods=['POST', 'GET'])
 def post():
     message = request.form['message']
     user = session.get('user')
-    contact = request.form.get('contact')
     channel = session.get('channel')
+    contact= session.get('contact')
+    print(contact)
     #print ('channel',channel) 
-    DataBase.publish_message(user, channel, message)
+    chat=DataBase.publish_message(user, contact, channel, message)
+    print('chat:',chat)
     return Response(status=204)
 
 @app.route('/stream', methods=['GET','POST'])
