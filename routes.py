@@ -48,11 +48,13 @@ def chat_users():
     username=session.get('user')
     dettaglioUtente = username
     contacts = DataBase.contact_list(username)
+    text = request.args.get('text')
+    if text:
+        user_id = DataBase.search_user(text)
     if request.method == 'GET':
-        text = request.args.get('text')
-        if text:
-            user_id = DataBase.search_user(text)
-        return render_template('chat_users.html', user_id=user_id, dettaglioUtente=dettaglioUtente, contacts=contacts)
+        channel = request.args.get('channel')
+        return render_template('chat_users.html', user_id=user_id, dettaglioUtente=dettaglioUtente, contacts=contacts, channel=channel)
+    return render_template('chat_users.html', user_id=user_id, dettaglioUtente=dettaglioUtente, contacts=contacts)
 
 @app.route('/add_contact', methods=['POST'])
 def add_contact():
@@ -77,34 +79,43 @@ def change_mode():
             DataBase.dnd_mode_f(username)
     return redirect('/chat_users')
 
-@app.route ('/start_chat', methods=['POST'])
+@app.route ('/start_chat', methods=['POST']) #creo que no uso esta funcion
 def start_chat ():
     if request.method == 'POST':
         username = session.get('user')
         contact= request.form.get('contact')
         channel=DataBase.subscribe_chat(username,contact)
+        print('chat channel', channel)
+        session['channel'] = channel
+        print('session chanel',channel)
     return redirect ('/chat_users')
 
 @app.route ('/channel', methods=['GET','POST'])
 def channel():
     username=session.get('user')
     contact= request.args.get('contact')
-    channel=f'{username}_{contact}'
-    return redirect (url_for ('chat_users', channel=channel))
+    channel_name=f'{username}_{contact}'
+    sort_letters = ''.join(sorted(channel_name.replace('_', '')))
+    channel_sort = sort_letters[:len(sort_letters)//2] + '_' + sort_letters[len(sort_letters)//2:]
+    #print(channel_sort)
+    session['channel'] = channel_sort
+    return redirect (url_for ('chat_users', channel=channel_sort))
 
-@app.route('/post', methods=['POST'])
+@app.route('/post', methods=['POST', 'GET'])
 def post():
     message = request.form['message']
     user = session.get('user')
-    contact= request.form.get('contact')
-    DataBase.publish_message(user,contact, message)
+    contact = request.form.get('contact')
+    channel = session.get('channel')
+    #print ('channel',channel) 
+    DataBase.publish_message(user, channel, message)
     return Response(status=204)
 
 @app.route('/stream', methods=['GET','POST'])
 def stream():
-    username=session.get('user')
-    contact= request.args.get('contact')
-    return Response(DataBase.event_stream(username,contact), mimetype="text/event-stream")
+    channel = session.get('channel') 
+    #print ('channel stream',channel) 
+    return Response(DataBase.event_stream(channel), mimetype="text/event-stream")
     
 if __name__ == '__main__':
     app.run(debug=True)

@@ -101,6 +101,9 @@
     </ul>
         </div>
         <div id="chat-area">
+            <form action="/post" method="POST">
+                <input type="hidden" name="channel" value="{{ channel }}">
+            </form>
             <h2 {{ channel }}></h2>
             <p>Message: <input id="in" /></p>
 <pre id="out"></pre>
