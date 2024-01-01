@@ -100,14 +100,37 @@
         {% endif %}
     </ul>
         </div>
+        <div id="respuesta"></div>
         <div id="chat-area">
             <form action="/post" method="POST">
                 <input type="hidden" name="channel" value="{{ channel }}">
             </form>
             <h2 {{ channel }}></h2>
+            
             <p>Message: <input id="in" /></p>
 <pre id="out"></pre>
-<script>
+<script> 
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/stream', true);
+    xhr.onload = function() {
+    if (xhr.status === 200) {
+        console.log(xhr.responseText);
+        var out = document.getElementById('out');
+            out.innerHTML =  xhr.responseText + "\n" + out.innerHTML;
+        }
+    };
+    $('#in').keyup(function(e){
+        if (e.keyCode == 13) {
+            $.post('/post', {'message': $(this).val()},function(data){
+                $('#respuesta').html(data);
+                });
+
+            $(this).val('');
+        }
+    });
+    xhr.send()
+</script>
+<!-- <script>
     function sse() {
         var source = new EventSource('/stream');
         var out = document.getElementById('out');
@@ -123,7 +146,7 @@
         }
     });
     sse();
-</script>
+</script> -->
 
 </body>
 </html>

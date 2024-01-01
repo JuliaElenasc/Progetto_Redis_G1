@@ -143,19 +143,17 @@ class DataBase:
     #         yield 'data: %s\n\n' % message['data']
 
     @staticmethod
-    def messages(username,contact,channel, message, send=True):
+    def messages(username,contact,channel, message):
         redis_db = get_config().redis_client
         contact_mode = DataBase.get_mode(contact)
         now = datetime.datetime.now().replace(microsecond=0).time()
-        prefix = ">" if send else "<"
         if contact_mode == b'False':
-            message = f"{prefix} {message}"
             result= redis_db.lpush(channel, '[%s] %s: %s' % (now.isoformat(), username, message))
-            if result > 0:
-                redis_db.publish(f"alert:{username}", "New message")
+            print(result)
             return result
         else:
-            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), username, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
+            return False
+            #return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), username, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
 
     @staticmethod
     def read_messages(channel):

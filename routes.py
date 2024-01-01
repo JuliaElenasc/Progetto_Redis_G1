@@ -108,16 +108,19 @@ def post():
     user = session.get('user')
     channel = session.get('channel')
     contact= session.get('contact')
-    print(contact)
+    #print(contact)
     #print ('channel',channel) 
     chat=DataBase.messages(user,contact, channel, message)
+    if chat == False:
+        return Response("!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA")
+    else:
     #print('chat:',chat)
-    return Response(status=204)
+        return Response(status=204)
 
 @app.route ('/stream', methods=['GET', 'POST'])
 def stream():
     channel = session.get('channel')
-    response = Response(DataBase.read_messages(channel), content_type='text/event-stream')
+    response = Response(DataBase.read_messages(channel))#, content_type='text/event-stream')
     return response
 
 # @app.route('/stream', methods=['GET','POST'])
