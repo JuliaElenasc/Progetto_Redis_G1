@@ -113,53 +113,34 @@ class DataBase:
         mode= redis_db.hget(user_key, "mode")
         return mode
     
-    # @staticmethod
-    # def subscribe_chat(username, contact):
-    #     redis_db = get_config().redis_client
-    #     pubsub = redis_db.pubsub()
-    #     channel = f'{username}_{contact}'
-    #     pubsub.subscribe(channel)
-    #     return pubsub
-    
-    # @staticmethod
-    # def publish_message (user, contact,channel, message):
-    #     redis_db = get_config().redis_client
-    #     #user_mode = DataBase.get_mode(user)
-    #     contact_mode = DataBase.get_mode(contact)
-    #     #print('mode dnd del contacto:',contact_mode)
-    #     now = datetime.datetime.now().replace(microsecond=0).time()
-    #     if contact_mode == b'False':
-    #         return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, message))
-    #     else:
-    #         return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
-             
-        
-    # @staticmethod
-    # def event_stream(channel):
-    #     redis_db = get_config().redis_client
-    #     pubsub = redis_db.pubsub(ignore_subscribe_messages=True)
-    #     pubsub.subscribe(channel)
-    #     for message in pubsub.listen():
-    #         yield 'data: %s\n\n' % message['data']
-
     @staticmethod
-    def messages(username,contact,channel, message):
+    def subscribe_chat(username, contact):
         redis_db = get_config().redis_client
+        pubsub = redis_db.pubsub()
+        channel = f'{username}_{contact}'
+        pubsub.subscribe(channel)
+        return pubsub
+    
+    @staticmethod
+    def publish_message (user, contact,channel, message):
+        redis_db = get_config().redis_client
+        #user_mode = DataBase.get_mode(user)
         contact_mode = DataBase.get_mode(contact)
+        #print('mode dnd del contacto:',contact_mode)
         now = datetime.datetime.now().replace(microsecond=0).time()
         if contact_mode == b'False':
-            result= redis_db.lpush(channel, '[%s] %s: %s' % (now.isoformat(), username, message))
-            print(result)
-            return result
+            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, message))
         else:
-            return False
-            #return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), username, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
-
+            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
+             
+        
     @staticmethod
-    def read_messages(channel):
+    def event_stream(channel):
         redis_db = get_config().redis_client
-        messages=redis_db.lrange(f"{channel}", 0, -1)
-        print('read_messages:',messages)
-        for message in messages:
-             yield 'data: %s\n\n' % message.decode('utf-8')
+        pubsub = redis_db.pubsub(ignore_subscribe_messages=True)
+        pubsub.subscribe(channel)
+        for message in pubsub.listen():
+            yield 'data: %s\n\n' % message['data']
+
+
         
