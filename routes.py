@@ -110,15 +110,21 @@ def post():
     contact= session.get('contact')
     print(contact)
     #print ('channel',channel) 
-    chat=DataBase.publish_message(user, contact, channel, message)
-    print('chat:',chat)
+    chat=DataBase.messages(user,contact, channel, message)
+    #print('chat:',chat)
     return Response(status=204)
 
-@app.route('/stream', methods=['GET','POST'])
+@app.route ('/stream', methods=['GET', 'POST'])
 def stream():
-    channel = session.get('channel') 
-    #print ('channel stream',channel) 
-    return Response(DataBase.event_stream(channel), mimetype="text/event-stream")
+    channel = session.get('channel')
+    response = Response(DataBase.read_messages(channel), content_type='text/event-stream')
+    return response
+
+# @app.route('/stream', methods=['GET','POST'])
+# def stream():
+#     channel = session.get('channel') 
+#     #print ('channel stream',channel) 
+#     return Response(DataBase.event_stream(channel), mimetype="text/event-stream")
     
 if __name__ == '__main__':
     app.run(debug=True)
