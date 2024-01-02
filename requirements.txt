@@ -11,4 +11,9 @@ Considerazioni aggiuntive:
 - Quando un utente accede, la modalità DND è automaticamente disattivata. 
 - Poiché una chat tra 2 persone attiva fino a 5 clienti in redis, è consigliabile non creare più di 4 utenti in questo momento; se si supera questa quantità, la connessione a redis fallisce.
 
+Utenti di prova:
+nome user: pepe
+password: 12345
 
+nome user: pedro
+password: 12345
