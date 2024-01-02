@@ -1,6 +1,8 @@
 import datetime
 from flask import Flask, Response, g, request, jsonify, render_template, redirect, session, url_for
 from config import get_config, User, DataBase
+import threading
+
 
 app = Flask(__name__)
 app.secret_key = '12345'
@@ -85,9 +87,9 @@ def start_chat ():
         username = session.get('user')
         contact= request.form.get('contact')
         channel=DataBase.subscribe_chat(username,contact)
-        print('chat channel', channel)
+        #print('chat channel', channel)
         session['channel'] = channel
-        print('session chanel',channel)
+        #print('session chanel',channel)
     return redirect ('/chat_users')
 
 @app.route ('/channel', methods=['GET','POST'])
@@ -100,6 +102,7 @@ def channel():
     #print(channel_sort)
     session['channel'] = channel_sort
     session['contact']=contact
+    
     return redirect (url_for ('chat_users', channel=channel_sort))
 
 @app.route('/post', methods=['POST', 'GET'])
@@ -108,17 +111,17 @@ def post():
     user = session.get('user')
     channel = session.get('channel')
     contact= session.get('contact')
-    print(contact)
+    #print(contact)
     #print ('channel',channel) 
     chat=DataBase.publish_message(user, contact, channel, message)
-    print('chat:',chat)
+    #print('chat:',chat)
     return Response(status=204)
 
 @app.route('/stream', methods=['GET','POST'])
 def stream():
     channel = session.get('channel') 
     #print ('channel stream',channel) 
-    return Response(DataBase.event_stream(channel), mimetype="text/event-stream")
+    return Response(DataBase.event_stream(channel,10), mimetype="text/event-stream")
     
 if __name__ == '__main__':
     app.run(debug=True)

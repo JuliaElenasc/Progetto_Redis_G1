@@ -1,8 +1,9 @@
 import json
 import redis
-import os
-from flask import Flask, Response, g, request, jsonify
 import datetime
+import time
+from flask import session
+
 
 
 #Conessione al server
@@ -135,12 +136,18 @@ class DataBase:
              
         
     @staticmethod
-    def event_stream(channel):
+    def event_stream(channel, time_activity):
         redis_db = get_config().redis_client
         pubsub = redis_db.pubsub(ignore_subscribe_messages=True)
         pubsub.subscribe(channel)
+        last_activity_time = time.time()
         for message in pubsub.listen():
+            if time.time() - last_activity_time > time_activity:
+                pubsub.close()
+                break
             yield 'data: %s\n\n' % message['data']
+        
+
 
 
         
