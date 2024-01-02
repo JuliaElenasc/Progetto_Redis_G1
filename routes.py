@@ -121,7 +121,7 @@ def post():
 def stream():
     channel = session.get('channel') 
     #print ('channel stream',channel) 
-    return Response(DataBase.event_stream(channel,10), mimetype="text/event-stream")
+    return Response(DataBase.event_stream(channel,60), mimetype="text/event-stream")
     
 if __name__ == '__main__':
     app.run(debug=True)

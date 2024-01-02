@@ -143,7 +143,7 @@ class DataBase:
         last_activity_time = time.time()
         for message in pubsub.listen():
             if time.time() - last_activity_time > time_activity:
-                pubsub.close()
+                pubsub.unsubscribe()
                 break
             yield 'data: %s\n\n' % message['data']
         
