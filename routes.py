@@ -1,7 +1,5 @@
-import datetime
-from flask import Flask, Response, g, request, jsonify, render_template, redirect, session, url_for
+from flask import Flask, Response, request, jsonify, render_template, redirect, session, url_for
 from config import get_config, User, DataBase
-import threading
 
 
 app = Flask(__name__)

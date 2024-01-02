@@ -1,3 +1,14 @@
-instalar Flask
-instalar Redis
+
+Per questo progetto sonno utilizzati: 
+Flask, redis, json, datetime, time. 
+
+Per eseguire l'applicazione è necessario accedere al file routes.py e farlo girare sul computer che funge da server locale. 
+Poi, si accede all'URL http://localhost:5000/ e si può iniziare a utilizzare l'applicazione. 
+
+Considerazioni aggiuntive: 
+- Ogni utente viene creato con un nome utente, una password e uno stato attivo per recivere messagi. 
+- Quando un utente imposta il suo profilo su DND, può cambiarlo di nuovo nello stesso modo. 
+- Quando un utente accede, la modalità DND è automaticamente disattivata. 
+- Poiché una chat tra 2 persone attiva fino a 5 clienti in redis, è consigliabile non creare più di 4 utenti in questo momento; se si supera questa quantità, la connessione a redis fallisce.
+
 
