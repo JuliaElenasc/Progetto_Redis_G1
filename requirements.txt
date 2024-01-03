@@ -1,15 +1,15 @@
 
-Per questo progetto sonno utilizzati: 
-Flask, redis, json, datetime, time. 
+Per questo progetto, sono state utilizzate le seguenti librerie: Flask, redis, json, datetime e time. Assicurarsi di avere tutte le librerie installate nel proprio ambiente prima di eseguire il codice. In caso contrario, è possibile installarle utilizzando uno strumento come pip: pip install (più il nome della libreria interessata).
+
 
 Per eseguire l'applicazione è necessario accedere al file routes.py e farlo girare sul computer che funge da server locale. 
-Poi, si accede all'URL http://localhost:5000/ e si può iniziare a utilizzare l'applicazione. 
+Una volta fatto il punto precedente, collegandosi all'URL: 'http://localhost:5000/', si può iniziare ad utilizzare l'applicazione. 
 
 Considerazioni aggiuntive: 
-- Ogni utente viene creato con un nome utente, una password e uno stato attivo per recivere messagi. 
-- Quando un utente imposta il suo profilo su DND, può cambiarlo di nuovo nello stesso modo. 
+- Ogni utente viene creato con un nome utente, una password e uno stato attivo per ricevere i messaggi. 
+- Quando un utente imposta il suo profilo su DND, può cambiare lo stato anche in seguito. 
 - Quando un utente accede, la modalità DND è automaticamente disattivata. 
-- Poiché una chat tra 2 persone attiva fino a 5 clienti in redis, è consigliabile non creare più di 4 utenti in questo momento; se si supera questa quantità, la connessione a redis fallisce.
+- Poiché una chat tra 2 persone attiva fino a 5 clienti, in redis, è consigliabile non creare più di 4 utenti nello stesso momento; se si supera questa quantità, la connessione a redis fallisce.
 
 Utenti di prova:
 nome user: pepe
