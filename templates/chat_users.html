@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat con lista di contatti</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+
         /* Estilos básicos */
         #chat-container {
             display: flex;
@@ -12,16 +20,14 @@
             padding: 20px;
             border: 1px solid #ccc;
         }
-        #user-list {
+
+        #user-list, #chat-area {
             flex: 1;
             padding: 10px;
-            border-right: 1px solid #eee;
+            border: 1px solid #eee;
+            margin: 0 10px;
         }
-        #chat-area {
-            flex: 2;
-            padding: 10px;
-            border-left: 1px solid #eee;
-        }
+
         #chat-messages {
             border: 1px solid #eee;
             height: 300px;
@@ -29,23 +35,48 @@
             margin-bottom: 10px;
             padding: 10px;
         }
+
         #chat-form input[type="text"] {
             width: 80%;
             padding: 8px;
         }
+
         #chat-form input[type="submit"] {
             padding: 8px 15px;
             cursor: pointer;
         }
+
         #user-search input[type="text"] {
             width: 100%;
             margin-bottom: 10px;
             padding: 8px;
         }
+
         #user-search input[type="submit"] {
             width: 100%;
             padding: 8px 15px;
             cursor: pointer;
+        }
+
+        #contacts-list {
+            margin-top: 20px;
+        }
+
+        #contacts-list h3 {
+            color: #0066cc;
+        }
+
+        #contacts-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #contacts-list li {
+            margin-bottom: 10px;
+        }
+
+        #contacts-list form {
+            display: inline-block;
         }
     </style>
 </head>
@@ -55,76 +86,80 @@
         <form action="/change_mode" method="post">
             <input type="radio" id="acceso" name="mode" value="on">
             <label for="acceso">DND On </label><br>
-        
+
             <input type="radio" id="spento" name="mode" value="off">
             <label for="spento">DND Off</label><br>
-        
+
             <input type="submit" value="Save">
         </form>
     {% else %}
         <p>No se ha iniciado sesión.</p>
     {% endif %}
-    
+
     <form action="{{ url_for('chat_users') }}" method="GET">
         <input type="text" name="text">
         <input type="submit" value="Search">
     </form>
-    <ul id="user_id">
+
+    <div id="user_id">
         {% if user_id is not none %}
-            {% for user in user_id %}
-                <li>{{ user }} 
-                    <form action="{{ url_for('add_contact', username=user) }}" method="POST">
-                        <input type="hidden" name="contact" value="{{ user }}">
-                        <input type="submit" value="Add contact">
-                    </form>
-                </li>
-            {% endfor %}
+            <ul>
+                {% for user in user_id %}
+                    <li>{{ user }}
+                        <form action="{{ url_for('add_contact', username=user) }}" method="POST">
+                            <input type="hidden" name="contact" value="{{ user }}">
+                            <input type="submit" value="Add contact">
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
         {% else %}
-            <li>No users found</li>
+            <p>No users found</p>
         {% endif %}
-    </ul>
-    <ul id="contacts-list">
+    </div>
+
+    <div id="contacts-list">
         {% if contacts %}
             <h3>Contatti</h3>
             <ul>
                 {% for contact in contacts %}
-                    <li>{{ contact }}</li>
-                    <form action="{{ url_for('channel', contact=contact) }}" method="POST">
-                        <input type="hidden" name="contact" value="{{ contact }}">
-                        <input type="submit" value="Start Chat">
-                    </form>
+                    <li>{{ contact }}
+                        <form action="{{ url_for('channel', contact=contact) }}" method="POST">
+                            <input type="hidden" name="contact" value="{{ contact }}">
+                            <input type="submit" value="Start Chat">
+                        </form>
+                    </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>Nesun contatto ancora.</p>
+            <p>Nessun contatto ancora.</p>
         {% endif %}
-    </ul>
-        </div>
-        <div id="chat-area">
-            <form action="/post" method="POST">
-                <input type="hidden" name="channel" value="{{ channel }}">
-            </form>
-            <h2 {{ channel }}></h2>
-            <p>Message: <input id="in" /></p>
-<pre id="out"></pre>
-<script>
-    function sse() {
-        var source = new EventSource('/stream');
-        var out = document.getElementById('out');
-        source.onmessage = function(e) {
-            console.log(e.data)
-            out.innerHTML =  e.data + "\n" + out.innerHTML;
-        };
-    }
-    $('#in').keyup(function(e){
-        if (e.keyCode == 13) {
-            $.post('/post', {'message': $(this).val()});
-            $(this).val('');
-        }
-    });
-    sse();
-</script>
+    </div>
 
+    <div id="chat-area">
+        <form action="/post" method="POST">
+            <input type="hidden" name="channel" value="{{ channel }}">
+        </form>
+        <h2 {{ channel }}></h2>
+        <p>Message: <input id="in" /></p>
+        <pre id="out"></pre>
+        <script>
+            function sse() {
+                var source = new EventSource('/stream');
+                var out = document.getElementById('out');
+                source.onmessage = function(e) {
+                    console.log(e.data)
+                    out.innerHTML =  e.data + "\n" + out.innerHTML;
+                };
+            }
+            $('#in').keyup(function(e){
+                if (e.keyCode == 13) {
+                    $.post('/post', {'message': $(this).val()});
+                    $(this).val('');
+                }
+            });
+            sse();
+        </script>
+    </div>
 </body>
 </html>
-
