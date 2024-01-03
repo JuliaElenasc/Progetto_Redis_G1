@@ -21,7 +21,7 @@ def add_registro():
         user = request.form['user']
         password = request.form['password']
         if DataBase.user_exists(user):
-            return jsonify({'errore': 'il nome d utente già esiste, prova un altro nome'})
+            return jsonify({'errore': 'il nome dell'utente esiste già, prova con un altro nome'})
         else: 
             utente = User(user, password)
             DataBase.insert_user(utente)
@@ -35,10 +35,10 @@ def login():
         data = DataBase.get_user(user, password)
         if data is not None:
             session['user']=user
-            DataBase.dnd_mode_f(user) #l'utente inizia sempre con il modo dnd inattivo (false in db)
+            DataBase.dnd_mode_f(user) #l'utente inizia sempre con lo stato dnd inattivo (false in db)
             return redirect ('/chat_users')
         else:
-            return jsonify({'errore': 'il nome d utente o la password sono errati'})
+            return jsonify({'errore': 'il nome dell'utente o la password sono errati'})
         
     return render_template('login.html')
 
@@ -79,7 +79,7 @@ def change_mode():
             DataBase.dnd_mode_f(username)
     return redirect('/chat_users')
 
-@app.route ('/start_chat', methods=['POST']) #creo que no uso esta funcion
+@app.route ('/start_chat', methods=['POST'])
 def start_chat ():
     if request.method == 'POST':
         username = session.get('user')
