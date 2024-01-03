@@ -6,7 +6,7 @@ from flask import session
 
 
 
-#Conessione al server
+#Connessione al server
 class Config(object):
     REDIS_HOST= 'redis-16811.c300.eu-central-1-1.ec2.cloud.redislabs.com'
     REDIS_PORT = 16811
@@ -24,7 +24,7 @@ class ConfigDev(Config):
 def get_config() -> Config:
     return ConfigDev
 
-# Interazione con la DB
+# Interazione con il DB
 class User: 
     def __init__(self, username, password): 
         self.username = username 
@@ -127,12 +127,12 @@ class DataBase:
         redis_db = get_config().redis_client
         #user_mode = DataBase.get_mode(user)
         contact_mode = DataBase.get_mode(contact)
-        #print('mode dnd del contacto:',contact_mode)
+        #print('modalità DND del contatto:',contact_mode)
         now = datetime.datetime.now().replace(microsecond=0).time()
         if contact_mode == b'False':
             return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, message))
         else:
-            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, UTENTE HA LA MODALITA DnD ATTIVA"))
+            return redis_db.publish(channel, '[%s] %s: %s' % (now.isoformat(), user, "!! IMPOSSIBILE RECAPITARE IL MESSAGGIO, L'UTENTE HA LA MODALITA DND ATTIVA"))
              
         
     @staticmethod
